@@ -102,9 +102,28 @@ export function VideoCallScreen({
             description: "You're now connected with your match.",
           });
         };
+
+        // Start call matching
+        await callMatchingService.findMatch(userProfile);
+        
+      } catch (error) {
+        console.error('Failed to initialize call:', error);
+        setConnectionStatus('failed');
+        toast({
+          title: "Connection failed",
+          description: "Failed to start video call. Please try again.",
+          variant: "destructive"
+        });
+      }
+    };
+
+    initializeCall();
+  }, [userProfile, toast]);
+
+  // Call duration timer
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (isConnected) {
+    if (connectionStatus === 'connected') {
       interval = setInterval(() => {
         setCallDuration(prev => {
           const newDuration = prev + 1;
@@ -192,6 +211,27 @@ export function VideoCallScreen({
     setActiveReactions(prev => prev.filter(r => r.id !== reactionId));
   };
 
+  const handleToggleAudio = () => {
+    setIsMuted(!isMuted);
+    if (webrtcService) {
+      webrtcService.toggleAudio();
+    }
+  };
+
+  const handleToggleVideo = () => {
+    setIsCameraOff(!isCameraOff);
+    if (webrtcService) {
+      webrtcService.toggleVideo();
+    }
+  };
+
+  const handleCallEnd = () => {
+    if (webrtcService) {
+      webrtcService.endCall();
+    }
+    onEndCall();
+  };
+
   const getStatusMessage = () => {
     switch (connectionStatus) {
       case 'searching':
@@ -206,6 +246,7 @@ export function VideoCallScreen({
         return 'Connecting...';
     }
   };
+
   return (
     <>
       <div className="fixed inset-0 bg-black z-50 safe-area-top safe-area-bottom">

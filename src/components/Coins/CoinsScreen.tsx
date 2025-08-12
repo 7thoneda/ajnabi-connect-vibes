@@ -67,7 +67,7 @@ export function CoinsScreen({
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-3">
                     <div className="p-3 bg-primary/10 rounded-full">
-                      <Phone className="w-6 h-6 text-primary" />
+                      <PhoneCall className="w-6 h-6 text-primary" />
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold font-poppins">Unlimited Calls</h3>
@@ -82,7 +82,7 @@ export function CoinsScreen({
                 {autoRenewEnabled && (
                   <div className="bg-green-50 border border-green-200 rounded-xl p-3 mb-4">
                     <div className="flex items-center gap-2">
-                      <RefreshCw className="w-4 h-4 text-green-600" />
+                      <RotateCcw className="w-4 h-4 text-green-600" />
                       <p className="text-sm font-medium text-green-800 font-poppins">Auto-renew enabled</p>
                     </div>
                     <p className="text-xs text-green-600 font-poppins mt-1">
