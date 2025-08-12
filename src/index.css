@@ -9,32 +9,42 @@ All colors MUST be HSL.
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 340 12% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 340 12% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 340 12% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 340 75% 55%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 15 75% 60%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 340 12% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 15 85% 65%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 0 0% 90%;
+    --input: 0 0% 95%;
+    --ring: 340 75% 55%;
+
+    --coin-gold: 45 90% 55%;
+    --premium-purple: 280 65% 60%;
+    
+    --gradient-primary: linear-gradient(135deg, hsl(340 75% 55%), hsl(15 75% 60%));
+    --gradient-secondary: linear-gradient(135deg, hsl(15 85% 65%), hsl(45 90% 55%));
+    --gradient-premium: linear-gradient(135deg, hsl(280 65% 60%), hsl(340 75% 55%));
+    
+    --shadow-warm: 0 10px 30px -5px hsl(340 75% 55% / 0.2);
+    --shadow-card: 0 4px 20px -2px hsl(340 20% 60% / 0.1);
 
     --radius: 0.5rem;
 
@@ -101,5 +111,364 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  /* Mobile-first responsive utilities */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Ensure safe areas work on all devices */
+  @supports (padding: max(0px)) {
+    .safe-area-top {
+      padding-top: max(env(safe-area-inset-top), 0px);
+    }
+    
+    .safe-area-bottom {
+      padding-bottom: max(env(safe-area-inset-bottom), 0px);
+    }
+  }
+
+  /* Smooth scrolling for mobile */
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Touch-friendly tap targets */
+  button, a, [role="button"] {
+    min-height: 40px;
+    min-width: 40px;
+  }
+  
+  @media (min-width: 640px) {
+    button, a, [role="button"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+
+  /* Hide scrollbar for photo galleries */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Prevent zoom on input focus on iOS */
+  @media screen and (max-width: 767px) {
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    textarea {
+      font-size: 16px;
+    }
+  }
+
+  /* Reaction animations */
+  @keyframes fireworks {
+    0% { transform: scale(0) rotate(0deg); opacity: 0; }
+    50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+    100% { transform: scale(0.8) rotate(360deg); opacity: 0; }
+  }
+
+  @keyframes kiss {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    50% { transform: translateY(-20px) scale(1.3); opacity: 1; }
+    100% { transform: translateY(-40px) scale(0.8); opacity: 0; }
+  }
+
+  @keyframes floating-heart {
+    0% { transform: translateY(0) scale(0.8); opacity: 1; }
+    50% { transform: translateY(-30px) scale(1.2); opacity: 1; }
+    100% { transform: translateY(-60px) scale(0.6); opacity: 0; }
+  }
+
+  @keyframes clap {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.2) rotate(-10deg); }
+    75% { transform: scale(1.2) rotate(10deg); }
+  }
+
+  @keyframes love-eyes {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 0; }
+  }
+
+  @keyframes fire {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    25% { transform: translateY(-10px) scale(1.1); opacity: 1; }
+    50% { transform: translateY(-5px) scale(1.2); opacity: 0.8; }
+    75% { transform: translateY(-15px) scale(1.1); opacity: 0.6; }
+    100% { transform: translateY(-30px) scale(0.8); opacity: 0; }
+  }
+
+  .animate-fireworks {
+    animation: fireworks 2.5s ease-out forwards;
+  }
+
+  .animate-kiss {
+    animation: kiss 2s ease-out forwards;
+  }
+
+  .animate-floating-heart {
+    animation: floating-heart 3s ease-out forwards;
+  }
+
+  .animate-clap {
+    animation: clap 1s ease-in-out 3 forwards;
+  }
+
+  .animate-love-eyes {
+    animation: love-eyes 2s ease-in-out forwards;
+  }
+
+  .animate-fire {
+    animation: fire 2.5s ease-out forwards;
+  }
+
+  /* Additional animations for the new design */
+  @keyframes gentle-bounce {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-3px); }
+  }
+
+  .animate-gentle-bounce {
+    animation: gentle-bounce 2s ease-in-out infinite;
+  }
+
+  @keyframes soft-glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.4); }
+    50% { box-shadow: 0 0 30px rgba(168, 85, 247, 0.6); }
+  }
+
+  .animate-soft-glow {
+    animation: soft-glow 3s ease-in-out infinite;
+  }
+
+  /* Enhanced animations for profile unlocks */
+  @keyframes card-float {
+    0%, 100% { transform: translateY(0px) rotate(1deg); }
+    50% { transform: translateY(-8px) rotate(-1deg); }
+  }
+
+  @keyframes icon-glow {
+    0%, 100% { 
+      box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
+      transform: scale(1);
+    }
+    50% { 
+      box-shadow: 0 0 25px rgba(168, 85, 247, 0.6);
+      transform: scale(1.05);
+    }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .animate-card-float {
+    animation: card-float 4s ease-in-out infinite;
+  }
+
+  .animate-icon-glow {
+    animation: icon-glow 2s ease-in-out infinite;
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  /* React Image Crop Styles */
+  .ReactCrop {
+    display: inline-block;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    touch-action: none;
+  }
+
+  .ReactCrop__image {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .ReactCrop__crop-selection {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translate3d(0, 0, 0);
+    box-sizing: border-box;
+    cursor: move;
+    box-shadow: 0 0 0 9999em rgba(0, 0, 0, 0.5);
+    touch-action: none;
+    border: 2px solid hsl(var(--primary));
+  }
+
+  .ReactCrop__crop-selection:focus {
+    outline: none;
+  }
+
+  .ReactCrop__drag-handle {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: hsl(var(--primary));
+    border: 2px solid #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    touch-action: none;
+  }
+
+  .ReactCrop__drag-handle::after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: #fff;
+    border-radius: 50%;
+  }
+
+  .ReactCrop__drag-handle--ne {
+    top: -6px;
+    right: -6px;
+    cursor: ne-resize;
+  }
+
+  .ReactCrop__drag-handle--se {
+    bottom: -6px;
+    right: -6px;
+    cursor: se-resize;
+  }
+
+  .ReactCrop__drag-handle--sw {
+    bottom: -6px;
+    left: -6px;
+    cursor: sw-resize;
+  }
+
+  .ReactCrop__drag-handle--nw {
+    top: -6px;
+    left: -6px;
+    cursor: nw-resize;
+  }
+
+  .ReactCrop__drag-handle--n {
+    top: -6px;
+    left: 50%;
+    margin-left: -6px;
+    cursor: n-resize;
+  }
+
+  .ReactCrop__drag-handle--e {
+    top: 50%;
+    right: -6px;
+    margin-top: -6px;
+    cursor: e-resize;
+  }
+
+  .ReactCrop__drag-handle--s {
+    bottom: -6px;
+    left: 50%;
+    margin-left: -6px;
+    cursor: s-resize;
+  }
+
+  .ReactCrop__drag-handle--w {
+    top: 50%;
+    left: -6px;
+    margin-top: -6px;
+    cursor: w-resize;
+  }
+
+  .ReactCrop__drag-bar {
+    position: absolute;
+  }
+
+  .ReactCrop__drag-bar.ord-n {
+    top: -4px;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    cursor: n-resize;
+  }
+
+  .ReactCrop__drag-bar.ord-e {
+    right: -4px;
+    top: 0;
+    width: 8px;
+    height: 100%;
+    cursor: e-resize;
+  }
+
+  .ReactCrop__drag-bar.ord-s {
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    cursor: s-resize;
+  }
+
+  .ReactCrop__drag-bar.ord-w {
+    top: 0;
+    left: -4px;
+    width: 8px;
+    height: 100%;
+    cursor: w-resize;
+  }
+
+  .ReactCrop__rule-of-thirds-hz::before,
+  .ReactCrop__rule-of-thirds-hz::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.4);
+  }
+
+  .ReactCrop__rule-of-thirds-hz::before {
+    top: 33.333%;
+  }
+
+  .ReactCrop__rule-of-thirds-hz::after {
+    top: 66.666%;
+  }
+
+  .ReactCrop__rule-of-thirds-vt::before,
+  .ReactCrop__rule-of-thirds-vt::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.4);
+  }
+
+  .ReactCrop__rule-of-thirds-vt::before {
+    left: 33.333%;
+  }
+
+  .ReactCrop__rule-of-thirds-vt::after {
+    left: 66.666%;
   }
 }
