@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Gem, Flame, Gift, Star, Trophy, Zap, Crown, Calendar, Clock, TrendingUp } from "lucide-react";
+import { Gem, Flame, Gift, Star, Trophy, Zap, Crown, Calendar, Clock, TrendingUp, Phone, RotateCcw } from "lucide-react";
 import { Treasure } from "@/components/ui/icons";
 
 interface LoginStreakData {
@@ -67,7 +67,7 @@ export function CoinsScreen({
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-3">
                     <div className="p-3 bg-primary/10 rounded-full">
-                      <PhoneCall className="w-6 h-6 text-primary" />
+                      <Phone className="w-6 h-6 text-primary" />
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold font-poppins">Unlimited Calls</h3>

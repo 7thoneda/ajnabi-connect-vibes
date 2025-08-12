@@ -53,7 +53,7 @@ const Index = () => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [coinBalance, setCoinBalance] = useState(100);
   const [showStreakModal, setShowStreakModal] = useState(false);
-  
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
   // Login streak and mystery box hooks
   const { streakData, claimReward } = useLoginStreak();
   const { profiles: blurredProfiles, unlockProfile } = useBlurredProfiles();
@@ -459,7 +459,6 @@ const Index = () => {
                     isPremium={isPremium}
                     hasUnlimitedCalls={hasUnlimitedCalls}
                     onRequestUpgrade={() => setShowPremiumModal(true)}
-                    onRequestUpgrade={() => setCurrentScreen("premium")}
                   />
                 )}
                 
@@ -526,7 +525,7 @@ const Index = () => {
                   <ProfileScreen 
                     profile={userProfile}
                     onEdit={() => setIsEditingProfile(true)}
-                    onUpdateProfile={(updatedProfile) => setUserProfile(updatedProfile)}
+                    onUpdateProfile={(updatedProfile) => setUserProfile({ ...userProfile, ...updatedProfile })}
                     onBuyCoins={handleBuyCoins}
                     onViewBlurredProfiles={() => setCurrentScreen("blurred-profiles")}
                   />

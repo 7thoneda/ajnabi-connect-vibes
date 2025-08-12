@@ -13,7 +13,9 @@ import {
   onSnapshot,
   Timestamp,
   DocumentData,
-  QuerySnapshot
+  QuerySnapshot,
+  Query,
+  CollectionReference
 } from 'firebase/firestore';
 import { db } from '@/config/firebase';
 
@@ -79,7 +81,7 @@ export class FirestoreService {
     limitCount?: number
   ): Promise<DocumentData[]> {
     try {
-      let q = collection(db, collectionName);
+      let q: Query<DocumentData, DocumentData> | CollectionReference<DocumentData, DocumentData> = collection(db, collectionName);
       
       // Apply filters
       if (filters) {
@@ -112,7 +114,7 @@ export class FirestoreService {
     filters?: { field: string; operator: any; value: any }[]
   ) {
     try {
-      let q = collection(db, collectionName);
+      let q: Query<DocumentData, DocumentData> | CollectionReference<DocumentData, DocumentData> = collection(db, collectionName);
       
       // Apply filters
       if (filters) {

@@ -104,7 +104,13 @@ export function VideoCallScreen({
         };
 
         // Start call matching
-        await callMatchingService.findMatch(userProfile);
+        const matchingRequestId = await callMatchingService.startMatching(
+          userProfile.username,
+          userProfile.gender,
+          userProfile.matchPreference,
+          isPremium,
+          'video'
+        );
         
       } catch (error) {
         console.error('Failed to initialize call:', error);
