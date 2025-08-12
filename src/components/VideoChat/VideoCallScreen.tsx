@@ -90,16 +90,33 @@ export function VideoCallScreen({
 
         // Set up event handlers
         service.onRemoteStream = (stream: MediaStream) => {
+          console.log('Remote stream received:', stream);
           if (remoteVideoRef.current) {
             remoteVideoRef.current.srcObject = stream;
           }
         };
 
         service.onConnectionEstablished = () => {
+          console.log('WebRTC connection established');
           setConnectionStatus('connected');
           toast({
             title: "Connected! 🎉",
             description: "You're now connected with your match.",
+          });
+        };
+
+        service.onCallEnded = () => {
+          console.log('Call ended by remote peer');
+          onEndCall();
+        };
+
+        service.onError = (error: string) => {
+          console.error('WebRTC error:', error);
+          setConnectionStatus('failed');
+          toast({
+            title: "Connection Error",
+            description: error,
+            variant: "destructive"
           });
         };
 
@@ -111,12 +128,33 @@ export function VideoCallScreen({
           isPremium,
           'video'
         );
+
+        // Set up matching event handlers
+        callMatchingService.onMatchFound = async (callId: string, partnerId: string) => {
+          try {
+            console.log('Match found, joining call:', callId);
+            setConnectionStatus('connecting');
+            setPartnerInfo({ username: partnerId, gender: 'unknown' });
+            
+            // Join the WebRTC call
+            await service.joinCall(callId, 'video');
+            
+            // Get local stream and set it to video element
+            const localStream = service.getLocalStream();
+            if (localStream && localVideoRef.current) {
+              localVideoRef.current.srcObject = localStream;
+            }
+          } catch (error) {
+            console.error('Failed to join call:', error);
+            setConnectionStatus('failed');
+          }
+        };
         
       } catch (error) {
         console.error('Failed to initialize call:', error);
         setConnectionStatus('failed');
         toast({
-          title: "Connection failed",
+          title: "Initialization failed",
           description: "Failed to start video call. Please try again.",
           variant: "destructive"
         });
@@ -124,7 +162,15 @@ export function VideoCallScreen({
     };
 
     initializeCall();
-  }, [userProfile, toast]);
+
+    // Cleanup on unmount
+    return () => {
+      if (webrtcService) {
+        webrtcService.endCall();
+      }
+      callMatchingService.onMatchFound = undefined;
+    };
+  }, [userProfile, toast, onEndCall, isPremium]);
 
   // Call duration timer
   useEffect(() => {
@@ -218,22 +264,22 @@ export function VideoCallScreen({
   };
 
   const handleToggleAudio = () => {
-    setIsMuted(!isMuted);
     if (webrtcService) {
-      webrtcService.toggleAudio();
+      const isEnabled = webrtcService.toggleAudio();
+      setIsMuted(!isEnabled);
     }
   };
 
   const handleToggleVideo = () => {
-    setIsCameraOff(!isCameraOff);
     if (webrtcService) {
-      webrtcService.toggleVideo();
+      const isEnabled = webrtcService.toggleVideo();
+      setIsCameraOff(!isEnabled);
     }
   };
 
-  const handleCallEnd = () => {
+  const handleCallEnd = async () => {
     if (webrtcService) {
-      webrtcService.endCall();
+      await webrtcService.endCall();
     }
     onEndCall();
   };
@@ -245,7 +291,7 @@ export function VideoCallScreen({
       case 'connecting':
         return 'Connecting to your match...';
       case 'connected':
-        return partnerInfo?.username || 'Anonymous User';
+        return partnerInfo?.username || 'Connected User';
       case 'failed':
         return 'Connection failed';
       default:
