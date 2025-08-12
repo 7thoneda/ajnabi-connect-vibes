@@ -1,16 +1,26 @@
+import { supabase } from "@/integrations/supabase/client";
 import { RAZORPAY_KEY_ID, PAYMENT_CONFIG } from '@/config/payments';
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 export interface PaymentResult {
   success: boolean;
   error?: string;
   paymentId?: string;
   orderId?: string;
+  data?: any;
 }
 
-declare global {
-  interface Window {
-    Razorpay: any;
-  }
+export interface PaymentOptions {
+  amount: number;
+  productType: 'coins' | 'premium' | 'unlimited_calls';
+  productDetails: any;
+  onSuccess: (response: any) => void;
+  onError: (error: any) => void;
 }
 
 export class PaymentService {
@@ -30,29 +40,100 @@ export class PaymentService {
   }
 
   static async testPaymentGateway(): Promise<{ available: boolean; error?: string }> {
-    return { available: false, error: 'Payment backend not configured' };
+    try {
+      // Test if Razorpay script can be loaded
+      const isLoaded = await this.loadRazorpayScript();
+      return { available: isLoaded };
+    } catch (error) {
+      return { available: false, error: 'Failed to load Razorpay' };
+    }
   }
 
-  private static async createOrder(amountInRupees: number, description: string): Promise<any> {
-    throw new Error('Payment backend not configured');
-  }
+  static async initiatePayment(options: PaymentOptions): Promise<void> {
+    try {
+      // Load Razorpay script
+      const isScriptLoaded = await this.loadRazorpayScript();
+      if (!isScriptLoaded) {
+        throw new Error('Failed to load Razorpay script');
+      }
 
-  private static async verifyPayment(paymentData: any): Promise<PaymentResult> {
-    return {
-      success: false,
-      error: 'Payment backend not configured'
-    };
-  }
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        throw new Error('User not authenticated');
+      }
 
-  private static async initiatePayment(
-    amountInRupees: number, 
-    description: string,
-    userInfo?: { name?: string; email?: string; phone?: string }
-  ): Promise<PaymentResult> {
-    return {
-      success: false,
-      error: 'Payment backend not configured. Please set up a payment server to enable purchases.'
-    };
+      // Create order via Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke('razorpay-payments', {
+        body: {
+          action: 'create_order',
+          amount: options.amount,
+          currency: 'INR',
+          product_type: options.productType,
+          product_details: options.productDetails,
+          user_id: user.id,
+        },
+      });
+
+      if (error || !data.success) {
+        throw new Error(data?.error || 'Failed to create order');
+      }
+
+      // Configure Razorpay options
+      const razorpayOptions = {
+        key: RAZORPAY_KEY_ID,
+        amount: data.amount,
+        currency: data.currency,
+        order_id: data.order_id,
+        name: PAYMENT_CONFIG.company.name,
+        description: PAYMENT_CONFIG.company.description,
+        image: PAYMENT_CONFIG.company.logo,
+        theme: PAYMENT_CONFIG.company.theme,
+        handler: async (response: any) => {
+          try {
+            // Verify payment via Supabase Edge Function
+            const { data: verificationData, error: verificationError } = await supabase.functions.invoke('razorpay-payments', {
+              body: {
+                action: 'verify_payment',
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                user_id: user.id,
+              },
+            });
+
+            if (verificationError || !verificationData.success) {
+              throw new Error(verificationData?.error || 'Payment verification failed');
+            }
+
+            options.onSuccess(verificationData);
+          } catch (error) {
+            console.error('Payment verification error:', error);
+            options.onError(error);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            options.onError({ message: 'Payment cancelled by user' });
+          },
+        },
+        prefill: {
+          email: user.email || '',
+        },
+        notes: {
+          user_id: user.id,
+          product_type: options.productType,
+        },
+      };
+
+      // Open Razorpay checkout
+      const razorpay = new window.Razorpay(razorpayOptions);
+      razorpay.open();
+
+    } catch (error) {
+      console.error('Payment initiation error:', error);
+      options.onError(error);
+    }
   }
 
   // Premium subscription with price parameter
@@ -70,8 +151,31 @@ export class PaymentService {
       };
     }
 
-    const description = `Premium Subscription - ${plan.duration}`;
-    return this.initiatePayment(plan.price, description, userInfo);
+    return new Promise((resolve) => {
+      this.initiatePayment({
+        amount: plan.price,
+        productType: 'premium',
+        productDetails: { 
+          planId, 
+          duration: plan.duration,
+          coins: 0 
+        },
+        onSuccess: (response) => {
+          resolve({
+            success: true,
+            paymentId: response.order?.razorpay_payment_id,
+            orderId: response.order?.razorpay_order_id,
+            data: response
+          });
+        },
+        onError: (error) => {
+          resolve({
+            success: false,
+            error: error.message || 'Payment failed'
+          });
+        }
+      });
+    });
   }
 
   // Coin package purchase
@@ -89,8 +193,30 @@ export class PaymentService {
       };
     }
 
-    const description = `${coinPackage.coins} Coins Package`;
-    return this.initiatePayment(coinPackage.price, description, userInfo);
+    return new Promise((resolve) => {
+      this.initiatePayment({
+        amount: coinPackage.price,
+        productType: 'coins',
+        productDetails: { 
+          packageId, 
+          coins: coinPackage.coins 
+        },
+        onSuccess: (response) => {
+          resolve({
+            success: true,
+            paymentId: response.order?.razorpay_payment_id,
+            orderId: response.order?.razorpay_order_id,
+            data: response
+          });
+        },
+        onError: (error) => {
+          resolve({
+            success: false,
+            error: error.message || 'Payment failed'
+          });
+        }
+      });
+    });
   }
 
   // Unlimited calls subscription
@@ -100,7 +226,29 @@ export class PaymentService {
   ): Promise<PaymentResult> {
     const { UNLIMITED_CALLS_PLAN } = await import('@/config/payments');
     
-    const description = `Unlimited Voice Calls - ${UNLIMITED_CALLS_PLAN.duration}${autoRenew ? ' (Auto-renew)' : ''}`;
-    return this.initiatePayment(UNLIMITED_CALLS_PLAN.price, description, userInfo);
+    return new Promise((resolve) => {
+      this.initiatePayment({
+        amount: UNLIMITED_CALLS_PLAN.price,
+        productType: 'unlimited_calls',
+        productDetails: { 
+          duration: UNLIMITED_CALLS_PLAN.duration,
+          autoRenew 
+        },
+        onSuccess: (response) => {
+          resolve({
+            success: true,
+            paymentId: response.order?.razorpay_payment_id,
+            orderId: response.order?.razorpay_order_id,
+            data: response
+          });
+        },
+        onError: (error) => {
+          resolve({
+            success: false,
+            error: error.message || 'Payment failed'
+          });
+        }
+      });
+    });
   }
 }

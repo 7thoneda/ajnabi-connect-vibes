@@ -1,7 +1,7 @@
 // Razorpay configuration - using test key
-export const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_WQBAQbslF30m1w";
+export const RAZORPAY_KEY_ID = "rzp_test_WQBAQbslF30m1w"; // Test publishable key
 // IMPORTANT: RAZORPAY_SECRET_KEY should NEVER be in frontend code
-// It must be kept secure on your backend server for payment verification
+// It must be kept secure in Supabase secrets for payment verification
 
 // Payment configuration
 export const PAYMENT_CONFIG = {
